@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora REA IA Avançada</title>
+  <style>
+    :root {
+      --bg: #07121e;
+      --panel: rgba(15, 23, 42, 0.96);
+      --panelSoft: rgba(17, 24, 39, 0.86);
+      --border: rgba(148, 163, 184, 0.16);
+      --text: #e5eefb;
+      --muted: #9fb0c7;
+      --primary: #3b82f6;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      --cyan: #22d3ee;
+      --button: #dfeafc;
+      --buttonText: #111827;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #0d1b2a 0%, #07121e 42%, #030b14 100%);
+      color: var(--text);
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1500px;
+      display: grid;
+      grid-template-columns: 1fr 1.52fr;
+      gap: 22px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 18px 40px var(--shadow);
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: 1.45rem;
+      color: #f8fafc;
+    }
+
+    .display {
+      width: 100%;
+      height: 78px;
+      border: none;
+      border-radius: 12px;
+      background: #020817;
+      color: #f8fafc;
+      font-size: 2rem;
+      text-align: right;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 18px 0;
+      font-size: 1.06rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease, filter .12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .number { background: var(--button); color: var(--buttonText); }
+    .operator { background: var(--warning); color: white; }
+    .action { background: #9ca3af; color: #111827; }
+    .equal { background: var(--success); color: white; grid-column: span 2; }
+    .primary { background: linear-gradient(135deg, var(--primary), var(--cyan)); color: white; }
+    .secondary { background: rgba(139, 92, 246, 0.18); color: #ddd6fe; border: 1px solid rgba(139, 92, 246, 0.35); }
+    .ghost { background: rgba(59,130,246,.08); color: #dbeafe; border: 1px solid rgba(59,130,246,.2); }
+
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .description {
+      margin: 12px 0 18px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(59,130,246,.08);
+      border: 1px solid rgba(59,130,246,.18);
+      color: #dbeafe;
+      line-height: 1.5;
+    }
+
+    .adaptive-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .adaptive-actions button {
+      flex: 1;
+    }
+
+    .results, .ai-panel, .history-panel {
+      margin-top: 18px;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .results h3, .ai-panel h3, .history-panel h3 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      color: var(--muted);
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.98rem;
+      gap: 16px;
+    }
+
+    .stat:last-child { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: bold;
+    }
+
+    .green { background: rgba(16,185,129,.12); color: #6ee7b7; }
+    .red { background: rgba(239,68,68,.12); color: #fca5a5; }
+    .blue { background: rgba(59,130,246,.15); color: #93c5fd; }
+    .purple { background: rgba(139,92,246,.15); color: #c4b5fd; }
+    .amber { background: rgba(245,158,11,.12); color: #fcd34d; }
+
+    .ai-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .model-card {
+      background: rgba(17,24,39,.85);
+      border: 1px solid rgba(148,163,184,0.1);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .model-card .name {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .model-card .score {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 10px 0 8px;
+      color: #f8fafc;
+    }
+
+    .model-card .meta {
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.5;
+    }
+
+    .strong { font-weight: bold; color: #e5eefb; }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .history-item {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .model-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel">
+      <h2>Calculadora Básica</h2>
+      <input class="display" id="display" type="text" readonly value="0" />
+
+      <div class="buttons">
+        <button class="action" onclick="clearDisplay()">C</button>
+        <button class="action" onclick="deleteLast()">DEL</button>
+        <button class="operator" onclick="appendValue('/')">/</button>
+        <button class="operator" onclick="appendValue('*')">*</button>
+
+        <button class="number" onclick="appendValue('7')">7</button>
+        <button class="number" onclick="appendValue('8')">8</button>
+        <button class="number" onclick="appendValue('9')">9</button>
+        <button class="operator" onclick="appendValue('-')">-</button>
+
+        <button class="number" onclick="appendValue('4')">4</button>
+        <button class="number" onclick="appendValue('5')">5</button>
+        <button class="number" onclick="appendValue('6')">6</button>
+        <button class="operator" onclick="appendValue('+')">+</button>
+
+        <button class="number" onclick="appendValue('1')">1</button>
+        <button class="number" onclick="appendValue('2')">2</button>
+        <button class="number" onclick="appendValue('3')">3</button>
+        <button class="equal" onclick="calculateResult()">=</button>
+
+        <button class="number" onclick="appendValue('0')" style="grid-column: span 2;">0</button>
+        <button class="number" onclick="appendValue('.')">.</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>REA / IA Simulada / DevTools / Coding / Hacking</h2>
+
+      <select id="profileSelect">
+        <option value="reverse">Análise de reversão</option>
+        <option value="complexity">Complexidade de alvo</option>
+        <option value="automation">Automação de análise</option>
+        <option value="detection">Detecção / anti-analysis</option>
+        <option value="coding">Assistência de coding</option>
+        <option value="devtools">DevTools / debugging</option>
+        <option value="effort">Esforço estimado</option>
+        <option value="custom">Personalizado</option>
+      </select>
+
+      <div id="description" class="description"></div>
+      <div id="dynamicInputs"></div>
+
+      <div class="adaptive-actions">
+        <button class="primary" id="calcAdaptive">Calcular</button>
+        <button class="secondary" id="resetAdaptive">Resetar</button>
+        <button class="ghost" id="saveHistoryBtn">Salvar histórico</button>
+      </div>
+
+      <div id="results" class="results"></div>
+
+      <div class="ai-panel">
+        <div class="ai-head">
+          <h3>Painel de IA</h3>
+          <span class="badge blue" id="aiModeBadge">Balanceado</span>
+        </div>
+        <div id="aiModels" class="model-grid"></div>
+      </div>
+
+      <div class="history-panel">
+        <h3>Histórico local</h3>
+        <div id="historyList" class="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "rea_ai_history_v1";
+    const display = document.getElementById("display");
+    let expression = "";
+
+    function appendValue(value){
+      if (display.value === "Error"){
+        expression = "";
+        display.value = "0";
+      }
+      expression += value;
+      display.value = expression;
+    }
+
+    function clearDisplay(){
+      expression = "";
+      display.value = "0";
+    }
+
+    function deleteLast(){
+      expression = expression.slice(0, -1);
+      display.value = expression || "0";
+    }
+
+    function calculateResult(){
+      try{
+        const safeExpression = expression.replace(/×/g, "*").replace(/÷/g, "/");
+        if (!/^[0-9+\-*/.() ]+$/.test(safeExpression)){
+          throw new Error("Expressão inválida");
+        }
+        const result = Function(`"use strict"; return (${safeExpression})`)();
+        if (!Number.isFinite(result)){
+          throw new Error("Resultado inválido");
+        }
+        expression = String(result);
+        display.value = expression;
+      }catch{
+        display.value = "Error";
+        expression = "";
+      }
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const key = event.key;
+      if (/^[0-9]$/.test(key) || ["+", "-", "*", "/", "."].includes(key)) {
+        appendValue(key);
+      } else if (key === "Enter" || key === "=") {
+        calculateResult();
+      } else if (key === "Backspace") {
+        deleteLast();
+      } else if (key === "Escape") {
+        clearDisplay();
+      }
+    });
+
+    const profiles = {
+      reverse: {
+        label: "Análise de reversão",
+        description: "Estima dificuldade de leitura, esforço de manutenção, risco e viabilidade de uma reversão segura.",
+        fields: [
+          { id: "complexidade", label: "Complexidade do alvo (%)", value: 72, type: "number" },
+          { id: "obfuscacao", label: "Obfuscação (%)", value: 60, type: "number" },
+          { id: "documentacao", label: "Documentação (%)", value: 48, type: "number" },
+          { id: "dependencias", label: "Dependências críticas", value: 5, type: "number" }
+        ],
+        calculate: (values) => {
+          const complex = Number(values.complexidade) || 0;
+          const obf = Number(values.obfuscacao) || 0;
+          const doc = Number(values.documentacao) || 0;
+          const deps = Number(values.dependencias) || 0;
+          const score = (complex * 0.38) + (obf * 0.26) + ((100 - doc) * 0.2) + (deps * 5);
+          const reversibilidade = clamp(100 - (score / 1.8), 0, 100);
+          const risco = clamp(score * 0.9, 0, 100);
+          const rec = reversibilidade >= 60 ? "Análise viável" : reversibilidade >= 35 ? "Requer planejamento" : "Muito difícil";
+
+          return {
+            indicadores: [
+              { label: "Reversibilidade", value: `${reversibilidade.toFixed(2)}%` },
+              { label: "Risco de análise", value: `${risco.toFixed(2)}%` },
+              { label: "Dependências", value: `${deps}` },
+              { label: "Conclusão", value: rec }
+            ],
+            status: rec,
+            statusClass: reversibilidade >= 60 ? "green" : reversibilidade >= 35 ? "amber" : "red"
+          };
+        }
+      },
+      complexity: {
+        label: "Complexidade de alvo",
+        description: "Avalia camadas de proteção, criptografia, modularização e sinais de engenharia do alvo.",
+        fields: [
+          { id: "camadas", label: "Camadas de proteção (%)", value: 55, type: "number" },
+          { id: "criptografia", label: "Criptografia / anti-tamper (%)", value: 62, type: "number" },
+          { id: "modularizacao", label: "Modularização (%)", value: 40, type: "number" },
+          { id: "sinais", label: "Sinais de engenharia (%)", value: 68, type: "number" }
+        ],
+        calculate: (values) => {
+          const camadas = Number(values.camadas) || 0;
+          const crypto = Number(values.criptografia) || 0;
+          const modular = Number(values.modularizacao) || 0;
+          const sinais = Number(values.sinais) || 0;
+          const score = (camadas * 0.35) + (crypto * 0.3) + ((100 - modular) * 0.15) + (sinais * 0.2);
+          const nivel = clamp(score, 0, 100);
+          const rec = nivel >= 70 ? "Alto" : nivel >= 45 ? "Médio" : "Baixo";
+
+          return {
+            indicadores: [
+              { label: "Nível de complexidade", value: `${nivel.toFixed(2)}%` },
+              { label: "Proteções combinadas", value: `${(camadas + crypto).toFixed(2)}%` },
+              { label: "Estrutura visível", value: `${clamp(100 - modular, 0, 100).toFixed(2)}%` },
+              { label: "Diagnóstico", value: rec }
+            ],
+            status: rec,
+            statusClass: nivel >= 70 ? "red" : nivel >= 45 ? "amber" : "green"
+          };
+        }
+      },
+      automation: {
+        label: "Automação de análise",
+        description: "Mede o potencial de automatizar scripts, rastreio, coleta causal e extração de informações.",
+        fields: [
+          { id: "script", label: "Cobertura de scripts (%)", value: 72, type: "number" },
+          { id: "heuristica", label: "Heurísticas (%)", value: 64, type: "number" },
+          { id: "instrumentacao", label: "Instrumentação (%)", value: 58, type: "number" },
+          { id: "ferramentas", label: "Ferramentas automáticas", value: 7, type: "number" }
+        ],
+        calculate: (values) => {
+          const script = Number(values.script) || 0;
+          const heur = Number(values.heuristica) || 0;
+          const inst = Number(values.instrumentacao) || 0;
+          const tools = Number(values.ferramentas) || 0;
+          const score = (script * 0.35) + (heur * 0.3) + (inst * 0.2) + (tools * 4);
+          const automacao = clamp(score, 0, 100);
+          const status = automacao >= 70 ? "Alta automação" : automacao >= 45 ? "Parcial" : "Baixa";
+
+          return {
+            indicadores: [
+              { label: "Automação estimada", value: `${automacao.toFixed(2)}%` },
+              { label: "Cobertura", value: `${script.toFixed(2)}%` },
+              { label: "Heurísticas", value: `${heur.toFixed(2)}%` },
+              { label: "Status", value: status }
+            ],
+            status,
+            statusClass: automacao >= 70 ? "green" : automacao >= 45 ? "blue" : "amber"
+          };
+        }
+      },
+      detection: {
+        label: "Detecção / anti-analysis",
+        description: "Avalia a presença de anti-debug, anti-VM, anti-hooking e bloqueios de sandbox.",
+        fields: [
+          { id: "antidebug", label: "Anti-debug (%)", value: 68, type: "number" },
+          { id: "antivm", label: "Anti-VM (%)", value: 54, type: "number" },
+          { id: "hooking", label: "Anti-hooking (%)", value: 71, type: "number" },
+          { id: "sandbox", label: "Bloqueio em sandbox (%)", value: 58, type: "number" }
+        ],
+        calculate: (values) => {
+          const antiDebug = Number(values.antidebug) || 0;
+          const antiVM = Number(values.antivm) || 0;
+          const hooking = Number(values.hooking) || 0;
+          const sandbox = Number(values.sandbox) || 0;
+          const score = (antiDebug * 0.28) + (antiVM * 0.25) + (hooking * 0.27) + (sandbox * 0.2);
+          const risco = clamp(score, 0, 100);
+          const status = risco >= 70 ? "Detecção alta" : risco >= 45 ? "Moderada" : "Baixa";
+
+          return {
+            indicadores: [
+              { label: "Nível de detecção", value: `${risco.toFixed(2)}%` },
+              { label: "Anti-debug", value: `${antiDebug.toFixed(2)}%` },
+              { label: "Anti-VM", value: `${antiVM.toFixed(2)}%` },
+              { label: "Status", value: status }
+            ],
+            status,
+            statusClass: risco >= 70 ? "red" : risco >= 45 ? "amber" : "green"
+          };
+        }
+      },
+      coding: {
+        label: "Assistência de coding",
+        description: "Pondera velocidade de escrita, clareza do código, análise de dependências e segurança de implementação.",
+        fields: [
+          { id: "legibilidade", label: "Legibilidade (%)", value: 76, type: "number" },
+          { id: "arquitetura", label: "Arquitetura (%)", value: 68, type: "number" },
+          { id: "seguranca", label: "Segurança (%)", value: 70, type: "number" },
+          { id: "complexidadeCodigo", label: "Complexidade do código (%)", value: 62, type: "number" }
+        ],
+        calculate: (values) => {
+          const legibilidade = Number(values.legibilidade) || 0;
+          const arquitetura = Number(values.arquitetura) || 0;
+          const seguranca = Number(values.seguranca) || 0;
+          const complex = Number(values.complexidadeCodigo) || 0;
+          const score = (legibilidade * 0.28) + (arquitetura * 0.25) + (seguranca * 0.27) + ((100 - complex) * 0.20);
+          const capacidade = clamp(score, 0, 100);
+          const status = capacidade >= 70 ? "Código saudável" : capacidade >= 45 ? "Requer revisão" : "Precisa reestruturação";
+
+          return {
+            indicadores: [
+              { label: "Qualidade estimada", value: `${capacidade.toFixed(2)}%` },
+              { label: "Legibilidade", value: `${legibilidade.toFixed(2)}%` },
+              { label: "Segurança", value: `${seguranca.toFixed(2)}%` },
+              { label: "Status", value: status }
+            ],
+            status,
+            statusClass: capacidade >= 70 ? "green" : capacidade >= 45 ? "blue" : "amber"
+          };
+        }
+      },
+      devtools: {
+        label: "DevTools / Debugging",
+        description: "Ajusta para análise de execução, observabilidade, breakpoints, traces, logs e análise de comportamento em tempo real.",
+        fields: [
+          { id: "instrumentacaoDev", label: "Instrumentação (%)", value: 74, type: "number" },
+          { id: "trace", label: "Tracing / logs (%)", value: 68, type: "number" },
+          { id: "observabilidade", label: "Observabilidade (%)", value: 71, type: "number" },
+          { id: "friccao", label: "Atrito operacional (%)", value: 41, type: "number" }
+        ],
+        calculate: (values) => {
+          const instrumentacao = Number(values.instrumentacaoDev) || 0;
+          const trace = Number(values.trace) || 0;
+          const observ = Number(values.observabilidade) || 0;
+          const friccao = Number(values.friccao) || 0;
+          const score = (instrumentacao * 0.32) + (trace * 0.26) + (observ * 0.24) + ((100 - friccao) * 0.18);
+          const debugScore = clamp(score, 0, 100);
+          const status = debugScore >= 70 ? "Debug eficiente" : debugScore >= 45 ? "Debug parcial" : "Debug difícil";
+
+          return {
+            indicadores: [
+              { label: "Eficácia de debug", value: `${debugScore.toFixed(2)}%` },
+              { label: "Instrumentação", value: `${instrumentacao.toFixed(2)}%` },
+              { label: "Observabilidade", value: `${observ.toFixed(2)}%` },
+              { label: "Status", value: status }
+            ],
+            status,
+            statusClass: debugScore >= 70 ? "green" : debugScore >= 45 ? "blue" : "amber"
+          };
+        }
+      },
+      effort: {
+        label: "Esforço estimado",
+        description: "Calcula tempo, profundidade e equipe necessárias para uma análise ou solução.",
+        fields: [
+          { id: "tempo", label: "Tempo disponível (horas)", value: 18, type: "number" },
+          { id: "recursos", label: "Recursos técnicos", value: 4, type: "number" },
+          { id: "profundidade", label: "Profundidade (%)", value: 76, type: "number" },
+          { id: "equipe", label: "Equipe", value: 2, type: "number" }
+        ],
+        calculate: (values) => {
+          const tempo = Number(values.tempo) || 0;
+          const recursos = Number(values.recursos) || 0;
+          const profundidade = Number(values.profundidade) || 0;
+          const equipe = Number(values.equipe) || 0;
+          const score = (profundidade * 0.55) + (recursos * 6) + (equipe * 8) - (tempo * 1.5);
+          const esforco = clamp(score, 0, 100);
+          const status = esforco >= 70 ? "Esforço alto" : esforco >= 40 ? "Médio" : "Baixo";
+
+          return {
+            indicadores: [
+              { label: "Esforço estimado", value: `${esforco.toFixed(2)}%` },
+              { label: "Tempo disponível", value: `${tempo}h` },
+              { label: "Profundidade", value: `${profundidade.toFixed(2)}%` },
+              { label: "Status", value: status }
+            ],
+            status,
+            statusClass: esforco >= 70 ? "red" : esforco >= 40 ? "amber" : "green"
+          };
+        }
+      },
+      custom: {
+        label: "Personalizado",
+        description: "Permite adaptar a análise a um alvo real com pesos específicos para dificuldade, risco, automação e devtools.",
+        fields: [
+          { id: "v1", label: "Dificuldade", value: 65, type: "number" },
+          { id: "v2", label: "Risco", value: 58, type: "number" },
+          { id: "v3", label: "Automação", value: 74, type: "number" },
+          { id: "p1", label: "Peso dificuldade (%)", value: 40, type: "number" },
+          { id: "p2", label: "Peso risco (%)", value: 35, type: "number" },
+          { id: "p3", label: "Peso automação (%)", value: 25, type: "number" }
+        ],
+        calculate: (values) => {
+          const v1 = Number(values.v1) || 0;
+          const v2 = Number(values.v2) || 0;
+          const v3 = Number(values.v3) || 0;
+          const p1 = Number(values.p1) || 0;
+          const p2 = Number(values.p2) || 0;
+          const p3 = Number(values.p3) || 0;
+          const total = (p1 + p2 + p3) || 1;
+          const score = ((v1 * p1) + (v2 * p2) + (v3 * p3)) / total;
+          const status = score >= 60 ? "Estratégico" : score >= 40 ? "Adequado" : "Simples";
+
+          return {
+            indicadores: [
+              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` },
+              { label: "Dificuldade", value: `${v1.toFixed(2)}%` },
+              { label: "Risco", value: `${v2.toFixed(2)}%` },
+              { label: "Automação", value: `${v3.toFixed(2)}%` }
+            ],
+            status,
+            statusClass: score >= 60 ? "purple" : score >= 40 ? "blue" : "green"
+          };
+        }
+      }
+    };
+
+    const aiModels = [
+      { name: "Analista Rápido", focus: "agilidade", description: "Foco em velocidade, triagem inicial e decisão útil sem muita espera.", weights: { complexity: 0.22, reverse: 0.24, automation: 0.20, detection: 0.18, effort: 0.16 } },
+      { name: "Guardião de Risco", focus: "risco", description: "Foco em segurança, anti-analysis, proteção e redução de surpresas.", weights: { complexity: 0.18, reverse: 0.22, automation: 0.12, detection: 0.34, effort: 0.14 } },
+      { name: "Estratégia de Reversão", focus: "reversão", description: "Foco em análise profunda e mapeamento do alvo e do comportamento.", weights: { complexity: 0.26, reverse: 0.28, automation: 0.18, detection: 0.14, effort: 0.14 } },
+      { name: "Automação IA", focus: "automação", description: "Foco em automação, escalabilidade e coleta contínua.", weights: { complexity: 0.16, reverse: 0.18, automation: 0.38, detection: 0.12, effort: 0.16 } },
+      { name: "Balanceado Geral", focus: "equilibrio", description: "Distribuição uniforme entre todas as dimensões do problema.", weights: { complexity: 0.22, reverse: 0.22, automation: 0.22, detection: 0.18, effort: 0.16 } },
+      { name: "Orquestrador IA", focus: "decision", description: "Escolhe a melhor estratégia para o contexto específico da tarefa.", weights: { complexity: 0.20, reverse: 0.24, automation: 0.20, detection: 0.20, effort: 0.16 } }
+    ];
+
+    function renderProfileInputs(key){
+      const profile = profiles[key];
+      const dynamicInputs = document.getElementById("dynamicInputs");
+      const description = document.getElementById("description");
+      description.textContent = profile.description;
+
+      dynamicInputs.innerHTML = profile.fields.map(field => `
+        <div class="field">
+          <label for="${field.id}">${field.label}</label>
+          <input id="${field.id}" type="${field.type}" value="${field.value}" />
+        </div>
+      `).join("");
+    }
+
+    function renderResults(resultData){
+      const results = document.getElementById("results");
+      const statusBadge = `<span class="badge ${resultData.statusClass}">${resultData.status}</span>`;
+
+      results.innerHTML = `
+        <h3>Resultado</h3>
+        <div class="stat">
+          <span>Status</span>
+          <strong>${statusBadge}</strong>
+        </div>
+        ${resultData.indicadores.map(item => `
+          <div class="stat">
+            <span>${item.label}</span>
+            <strong>${item.value}</strong>
+          </div>
+        `).join("")}
+      `;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function getProfileWeights(profileKey){
+      const map = {
+        reverse: { complexity: 0.25, reverse: 0.28, automation: 0.17, detection: 0.14, effort: 0.16 },
+        complexity: { complexity: 0.34, reverse: 0.22, automation: 0.12, detection: 0.16, effort: 0.16 },
+        automation: { complexity: 0.15, reverse: 0.18, automation: 0.38, detection: 0.12, effort: 0.17 },
+        detection: { complexity: 0.16, reverse: 0.16, automation: 0.10, detection: 0.42, effort: 0.16 },
+        coding: { complexity: 0.20, reverse: 0.22, automation: 0.18, detection: 0.16, effort: 0.24 },
+        devtools: { complexity: 0.18, reverse: 0.22, automation: 0.20, detection: 0.20, effort: 0.20 },
+        effort: { complexity: 0.17, reverse: 0.19, automation: 0.12, detection: 0.16, effort: 0.36 },
+        custom: { complexity: 0.20, reverse: 0.22, automation: 0.24, detection: 0.18, effort: 0.16 }
+      };
+      return map[profileKey] || map.reverse;
+    }
+
+    function mapValuesToSignals(values){
+      return {
+        complexity: Number(values.complexidade) || Number(values.camadas) || Number(values.v1) || Number(values.complexidadeCodigo) || 50,
+        reverse: Number(values.documentacao) ? 100 - Number(values.documentacao) : Number(values.obfuscacao) || Number(values.v2) || 50,
+        automation: Number(values.script) || Number(values.v3) || Number(values.legibilidade) || 50,
+        detection: Number(values.antidebug) || Number(values.risco) || Number(values.v2) || Number(values.friccao) || 50,
+        effort: Number(values.profundidade) || Number(values.tempo) || Number(values.v1) || 50
+      };
+    }
+
+    function getReason(focus, score){
+      if (focus === "automação") return score >= 70 ? "Excelente para escalonamento" : "Útil, mas exige supervisão";
+      if (focus === "risco") return score >= 70 ? "Conservador e defensivo" : "Avaliação cautelosa";
+      if (focus === "reversão") return score >= 70 ? "Ótimo para investigação profunda" : "Boa para análise estratégica";
+      if (focus === "agilidade") return score >= 70 ? "Resposta rápida e prática" : "Boa para triagem inicial";
+      if (focus === "equilibrio") return score >= 70 ? "Excelente equilíbrio geral" : "Adequado, com margem";
+      return score >= 70 ? "Decisão robusta" : "Decisão moderada";
+    }
+
+    function computeAiModelScores(profileKey, values){
+      const taskWeights = getProfileWeights(profileKey);
+      const signals = mapValuesToSignals(values);
+
+      const modelResults = aiModels.map(model => {
+        const s = {
+          complexity: clamp(signals.complexity * (model.focus === "agilidade" ? 1.06 : model.focus === "reversão" ? 1.12 : model.focus === "automação" ? 0.95 : model.focus === "risco" ? 1.08 : model.focus === "equilibrio" ? 1.00 : 1.04), 0, 100),
+          reverse: clamp(signals.reverse * (model.focus === "reversão" ? 1.12 : model.focus === "risco" ? 1.08 : model.focus === "automação" ? 0.92 : 1.00), 0, 100),
+          automation: clamp(signals.automation * (model.focus === "automação" ? 1.16 : model.focus === "equilibrio" ? 1.02 : 0.96), 0, 100),
+          detection: clamp(signals.detection * (model.focus === "risco" ? 1.18 : model.focus === "decision" ? 1.08 : 0.94), 0, 100),
+          effort: clamp(signals.effort * (model.focus === "agilidade" ? 0.9 : model.focus === "reversão" ? 1.08 : model.focus === "automação" ? 1.12 : 1.00), 0, 100)
+        };
+
+        const score = (
+          s.complexity * taskWeights.complexity +
+          s.reverse * taskWeights.reverse +
+          s.automation * taskWeights.automation +
+          s.detection * taskWeights.detection +
+          s.effort * taskWeights.effort
+        );
+
+        return {
+          ...model,
+          score: clamp(score, 0, 100),
+          reason: getReason(model.focus, score)
+        };
+      });
+
+      const best = [...modelResults].sort((a,b) => b.score - a.score)[0];
+      return { modelResults, best };
+    }
+
+    function renderAiModels(data){
+      const aiModelsDiv = document.getElementById("aiModels");
+      const aiBadge = document.getElementById("aiModeBadge");
+      const sorted = [...data.modelResults].sort((a,b) => b.score - a.score);
+      const winner = sorted[0];
+
+      aiBadge.textContent = winner.focus === "equilibrio" ? "Balanceado" : winner.focus === "risco" ? "Segurança" : winner.focus === "automação" ? "Automação" : winner.focus === "reversão" ? "Reversão" : winner.focus === "agilidade" ? "Agilidade" : "Decisão";
+
+      aiModelsDiv.innerHTML = sorted.map(model => `
+        <div class="model-card">
+          <div class="name">
+            <span>${model.name}</span>
+            <span class="badge ${model.score >= 75 ? "green" : model.score >= 55 ? "blue" : "amber"}">${model.focus}</span>
+          </div>
+          <div class="score">${model.score.toFixed(1)}%</div>
+          <div class="meta">
+            <div><span class="strong">Ponto forte:</span> ${model.description}</div>
+            <div><span class="strong">Conclusão:</span> ${model.reason}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function getHistory(){
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistoryEntry(entry){
+      const history = getHistory();
+      history.unshift(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 8)));
+      renderHistory();
+    }
+
+    function renderHistory(){
+      const list = document.getElementById("historyList");
+      const items = getHistory();
+
+      if (!items.length) {
+        list.innerHTML = '<div class="history-item">Nenhum histórico salvo ainda.</div>';
+        return;
+      }
+
+      list.innerHTML = items.map(item => `
+        <div class="history-item">
+          <div><span class="strong">Perfil:</span> ${item.profile}</div>
+          <div><span class="strong">Status:</span> ${item.status}</div>
+          <div><span class="strong">Melhor IA:</span> ${item.bestModel}</div>
+          <div><span class="strong">Data:</span> ${item.timestamp}</div>
+        </div>
+      `).join("");
+    }
+
+    function buildPayload(profileKey, result, aiData){
+      const raw = {};
+      const fields = profiles[profileKey].fields;
+      fields.forEach(field => {
+        const el = document.getElementById(field.id);
+        if (el) raw[field.id] = el.value;
+      });
+
+      return {
+        profile: profileKey,
+        profileLabel: profiles[profileKey].label,
+        timestamp: new Date().toISOString(),
+        inputs: raw,
+        result,
+        ai: {
+          winner: aiData.best.name,
+          scores: aiData.modelResults.map(m => ({ name: m.name, score: Number(m.score.toFixed(1)) }))
+        }
+      };
+    }
+
+    function trySendToBackend(payload){
+      const endpoint = window.__REA_API_URL__ || "";
+      if (!endpoint) return { ok: false, reason: "No API endpoint configured" };
+
+      return fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(res => ({ ok: res.ok, status: res.status })).catch(err => ({ ok: false, reason: err.message }));
+    }
+
+    function calculateAdaptive(){
+      const profileKey = document.getElementById("profileSelect").value;
+      const profile = profiles[profileKey];
+      const inputs = {};
+      profile.fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        if (element) inputs[field.id] = element.value;
+      });
+
+      const result = profile.calculate(inputs);
+      renderResults(result);
+
+      const aiData = computeAiModelScores(profileKey, inputs);
+      renderAiModels(aiData);
+
+      const payload = buildPayload(profileKey, result, aiData);
+      window.__LATEST_REA_PAYLOAD__ = payload;
+      trySendToBackend(payload).catch(() => {});
+    }
+
+    document.getElementById("profileSelect").addEventListener("change", (event) => {
+      renderProfileInputs(event.target.value);
+      calculateAdaptive();
+    });
+
+    document.getElementById("calcAdaptive").addEventListener("click", calculateAdaptive);
+    document.getElementById("resetAdaptive").addEventListener("click", () => {
+      renderProfileInputs(document.getElementById("profileSelect").value);
+      calculateAdaptive();
+    });
+
+    document.getElementById("saveHistoryBtn").addEventListener("click", () => {
+      const profileKey = document.getElementById("profileSelect").value;
+      const latest = window.__LATEST_REA_PAYLOAD__;
+      if (!latest) return;
+
+      saveHistoryEntry({
+        profile: profiles[profileKey].label,
+        status: latest.result.status,
+        bestModel: latest.ai.winner,
+        timestamp: new Date().toLocaleString("pt-BR")
+      });
+    });
+
+    renderProfileInputs("reverse");
+    renderHistory();
+    calculateAdaptive();
+  </script>
+</body>
+</html>
