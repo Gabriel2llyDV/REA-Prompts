@@ -3,34 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calculadora Adaptável</title>
+  <title>Calculadora REA - Engenharia Reversa & Automação</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --bg2: #111827;
-      --panel: rgba(17, 24, 39, 0.96);
-      --border: rgba(255,255,255,0.08);
-      --text: #e5e7eb;
-      --muted: #9ca3af;
+      --bg: #07111f;
+      --bg2: #0f172a;
+      --panel: rgba(15, 23, 42, 0.96);
+      --panelSoft: rgba(17, 24, 39, 0.82);
+      --border: rgba(148, 163, 184, 0.18);
+      --text: #e5eefb;
+      --muted: #9fb0c7;
       --primary: #3b82f6;
       --success: #10b981;
       --danger: #ef4444;
       --warning: #f59e0b;
       --purple: #8b5cf6;
-      --button: #e5e7eb;
-      --button-text: #111827;
-      --shadow: rgba(0,0,0,.28);
+      --cyan: #22d3ee;
+      --button: #dfeafc;
+      --buttonText: #111827;
+      --shadow: rgba(0, 0, 0, 0.35);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       min-height: 100vh;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
+      background: radial-gradient(circle at top, #0d1b2a 0%, #07111f 45%, #040b14 100%);
       color: var(--text);
       display: flex;
       justify-content: center;
@@ -40,9 +40,9 @@
 
     .app {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1280px;
       display: grid;
-      grid-template-columns: 1fr 1.3fr;
+      grid-template-columns: 1fr 1.35fr;
       gap: 24px;
     }
 
@@ -57,6 +57,7 @@
     h2 {
       margin: 0 0 18px;
       font-size: 1.5rem;
+      color: #f8fafc;
     }
 
     .display {
@@ -65,12 +66,13 @@
       border: none;
       border-radius: 12px;
       background: #020817;
-      color: white;
+      color: #f8fafc;
       font-size: 2rem;
       text-align: right;
       padding: 14px 16px;
       margin-bottom: 18px;
       overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.12);
     }
 
     .buttons {
@@ -83,30 +85,23 @@
       border: none;
       border-radius: 12px;
       padding: 18px 0;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
-      transition: transform .12s ease, opacity .12s ease;
+      transition: transform .12s ease, opacity .12s ease, filter .15s ease;
     }
 
     button:hover {
       transform: translateY(-1px);
-      opacity: 0.96;
+      filter: brightness(1.04);
     }
 
-    .number { background: var(--button); color: var(--button-text); }
+    .number { background: var(--button); color: var(--buttonText); }
     .operator { background: var(--warning); color: white; }
     .action { background: #9ca3af; color: #111827; }
     .equal { background: var(--success); color: white; grid-column: span 2; }
-    .primary { background: var(--primary); color: white; }
-
-    .adaptive-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
+    .primary { background: linear-gradient(135deg, var(--primary), var(--cyan)); color: white; }
+    .secondary { background: rgba(139, 92, 246, 0.18); color: #ddd6fe; border: 1px solid rgba(139, 92, 246, 0.28); }
 
     select {
       width: 100%;
@@ -141,16 +136,6 @@
       font-size: 1rem;
     }
 
-    .adaptive-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .adaptive-actions button {
-      flex: 1;
-    }
-
     .description {
       margin: 12px 0 18px;
       padding: 14px 16px;
@@ -159,6 +144,16 @@
       border: 1px solid rgba(59,130,246,.18);
       color: #dbeafe;
       line-height: 1.5;
+    }
+
+    .adaptive-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .adaptive-actions button {
+      flex: 1;
     }
 
     .results {
@@ -184,9 +179,7 @@
       font-size: 0.98rem;
     }
 
-    .stat:last-child {
-      border-bottom: none;
-    }
+    .stat:last-child { border-bottom: none; }
 
     .badge {
       display: inline-block;
@@ -200,18 +193,17 @@
     .red { background: rgba(239,68,68,.12); color: #fca5a5; }
     .blue { background: rgba(59,130,246,.15); color: #93c5fd; }
     .purple { background: rgba(139,92,246,.15); color: #c4b5fd; }
+    .amber { background: rgba(245,158,11,.12); color: #fcd34d; }
 
-    @media (max-width: 920px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <div class="panel">
-      <h2>Calculadora básica</h2>
+      <h2>Calculadora Básica</h2>
       <input class="display" id="display" type="text" readonly value="0" />
 
       <div class="buttons">
@@ -241,16 +233,14 @@
     </div>
 
     <div class="panel">
-      <div class="adaptive-header">
-        <h2>Calculadora adaptável</h2>
-      </div>
+      <h2>REA / Engenharia Reversa / Automação</h2>
 
       <select id="profileSelect" aria-label="Selecione a finalidade">
-        <option value="success">Taxa de sucesso</option>
-        <option value="conversion">Conversão</option>
-        <option value="productivity">Produtividade</option>
-        <option value="risk">Risco x recompensa</option>
-        <option value="roi">Custo x benefício / ROI</option>
+        <option value="reverse">Análise de reversão</option>
+        <option value="complexity">Complexidade de alvo</option>
+        <option value="automation">Automação de análise</option>
+        <option value="detection">Detecção / anti-analysis</option>
+        <option value="effort">Esforço estimado</option>
         <option value="custom">Personalizado</option>
       </select>
 
@@ -259,6 +249,7 @@
 
       <div class="adaptive-actions">
         <button class="primary" id="calcAdaptive">Calcular</button>
+        <button class="secondary" id="resetAdaptive">Resetar</button>
       </div>
 
       <div id="results" class="results"></div>
@@ -308,205 +299,211 @@
 
     document.addEventListener("keydown", (event) => {
       const key = event.key;
-
-      if (/^[0-9]$/.test(key) || ["+", "-", "*", "/", "."].includes(key)) {
-        appendValue(key);
-      } else if (key === "Enter" || key === "=") {
-        calculateResult();
-      } else if (key === "Backspace") {
-        deleteLast();
-      } else if (key === "Escape") {
-        clearDisplay();
-      }
+        if (/^[0-9]$/.test(key) || ["+", "-", "*", "/", "."].includes(key)) {
+          appendValue(key);
+        } else if (key === "Enter" || key === "=") {
+          calculateResult();
+        } else if (key === "Backspace") {
+          deleteLast();
+        } else if (key === "Escape") {
+          clearDisplay();
+        }
     });
 
     const profiles = {
-      success: {
-        label: "Taxa de sucesso",
-        description: "Avalia a chance real de um objetivo ser alcançado com base em tentativas, acertos e meta desejada.",
+      reverse: {
+        label: "Análise de reversão",
+        description: "Estima facilidade ou dificuldade de analisar um alvo, considerando obfuscação, proteção, documentação e dependências.",
         fields: [
-          { id: "total", label: "Tentativas totais", value: 100, type: "number" },
-          { id: "sucessos", label: "Sucessos", value: 65, type: "number" },
-          { id: "falhas", label: "Falhas", value: 35, type: "number" },
-          { id: "meta", label: "Meta de sucesso (%)", value: 70, type: "number" }
+          { id: "complexidade", label: "Complexidade do alvo (%)", value: 72, type: "number" },
+          { id: "obfuscacao", label: "Obfuscação (%)", value: 60, type: "number" },
+          { id: "documentacao", label: "Documentação disponível (%)", value: 48, type: "number" },
+          { id: "dependencias", label: "Dependências críticas (nº)", value: 5, type: "number" }
         ],
         calculate: (values) => {
-          const total = Number(values.total) || Number(values.sucessos) + Number(values.falhas) || 0;
-          const sucessos = Number(values.sucessos) || 0;
-          const falhas = Number(values.falhas) || 0;
-          const meta = Number(values.meta) || 0;
+          const complex = Number(values.complexidade) || 0;
+          const obf = Number(values.obfuscacao) || 0;
+          const doc = Number(values.documentacao) || 0;
+          const deps = Number(values.dependencias) || 0;
 
-          const taxaAcerto = total > 0 ? (sucessos / total) * 100 : 0;
-          const taxaPerda = total > 0 ? (falhas / total) * 100 : 0;
-          const chanceConseguir = taxaAcerto;
-          const chanceNaoConseguir = taxaPerda;
-          const score = (taxaAcerto * 0.8) + ((100 - taxaPerda) * 0.2);
-          const status = taxaAcerto >= meta ? "Acima da meta" : "Abaixo da meta";
+          const score = (complex * 0.4) + (obf * 0.3) + ((100 - doc) * 0.2) + (deps * 5);
+          const reversibilidade = Math.max(0, 100 - score / 1.8);
+          const risco = Math.max(0, score * 0.9);
+          const recomendacao = reversibilidade >= 60 ? "Análise viável" : reversibilidade >= 35 ? "Requer planejamento" : "Muito difícil";
 
           return {
             indicadores: [
-              { label: "Taxa de acerto", value: `${taxaAcerto.toFixed(2)}%` },
-              { label: "Taxa de perda", value: `${taxaPerda.toFixed(2)}%` },
-              { label: "Chance de conseguir", value: `${chanceConseguir.toFixed(2)}%` },
-              { label: "Chance de não conseguir", value: `${chanceNaoConseguir.toFixed(2)}%` },
-              { label: "Pontuação adaptativa", value: `${score.toFixed(2)} pts` }
+              { label: "Score de reversibilidade", value: `${reversibilidade.toFixed(2)}%` },
+              { label: "Risco de análise", value: `${risco.toFixed(2)}%` },
+              { label: "Elasticidade de dependências", value: `${deps}` },
+              { label: "Recomendação", value: recomendacao }
+            ],
+            status: recomendacao,
+            statusClass: reversibilidade >= 60 ? "green" : reversibilidade >= 35 ? "amber" : "red"
+          };
+        }
+      },
+
+      complexity: {
+        label: "Complexidade de alvo",
+        description: "Avalia a profundidade técnica de um alvo e a chance de encontrar pontos de entrada, padrões e vulnerabilidades.",
+        fields: [
+          { id: "camadas", label: "Camadas de proteção (%)", value: 55, type: "number" },
+          { id: "criptografia", label: "Criptografia / anti-tamper (%)", value: 62, type: "number" },
+          { id: "modularizacao", label: "Modularização (%)", value: 40, type: "number" },
+          { id: "sinais", label: "Sinais de engenharia (%)", value: 68, type: "number" }
+        ],
+        calculate: (values) => {
+          const camadas = Number(values.camadas) || 0;
+          const crypto = Number(values.criptografia) || 0;
+          const modular = Number(values.modularizacao) || 0;
+          const sinais = Number(values.sinais) || 0;
+
+          const score = (camadas * 0.35) + (crypto * 0.3) + ((100 - modular) * 0.15) + (sinais * 0.2);
+          const nivel = Math.min(100, score);
+          const recomendacao = nivel >= 70 ? "Alvo de alta complexidade" : nivel >= 45 ? "Alvo moderado" : "Alvo acessível";
+
+          return {
+            indicadores: [
+              { label: "Nível de complexidade", value: `${nivel.toFixed(2)}%` },
+              { label: "Proteções combinadas", value: `${(camadas + crypto).toFixed(2)}%` },
+              { label: "Visibilidade de estrutura", value: `${(100 - (100 - modular)).toFixed(2)}%` },
+              { label: "Diagnóstico", value: recomendacao }
+            ],
+            status: recomendacao,
+            statusClass: nivel >= 70 ? "red" : nivel >= 45 ? "amber" : "green"
+          };
+        }
+      },
+
+      automation: {
+        label: "Automação de análise",
+        description: "Meça o quanto o processo pode ser automatizado com scripts, heurísticas, rastreio e extração de artefatos.",
+        fields: [
+          { id: "script", label: "Cobertura de scripts (%)", value: 72, type: "number" },
+          { id: "heuristica", label: "Heurísticas disponíveis (%)", value: 64, type: "number" },
+          { id: "instrumentacao", label: "Instrumentação (%)", value: 58, type: "number" },
+          { id: "ferramentas", label: "Ferramentas automáticas (nº)", value: 7, type: "number" }
+        ],
+        calculate: (values) => {
+          const script = Number(values.script) || 0;
+          const heur = Number(values.heuristica) || 0;
+          const inst = Number(values.instrumentacao) || 0;
+          const tools = Number(values.ferramentas) || 0;
+
+          const score = (script * 0.35) + (heur * 0.3) + (inst * 0.2) + (tools * 4);
+          const automacao = Math.min(100, score);
+          const capacidade = automacao >= 70 ? "Alta automação" : automacao >= 45 ? "Automação parcial" : "Baixa automação";
+
+          return {
+            indicadores: [
+              { label: "Automação estimada", value: `${automacao.toFixed(2)}%` },
+              { label: "Cobertura funcional", value: `${script.toFixed(2)}%` },
+              { label: "Heurísticas", value: `${heur.toFixed(2)}%` },
+              { label: "Status", value: capacidade }
+            ],
+            status: capacidade,
+            statusClass: automacao >= 70 ? "green" : automacao >= 45 ? "blue" : "amber"
+          };
+        }
+      },
+
+      detection: {
+        label: "Detecção / anti-analysis",
+        description: "Avalia a presença de mecanismos de anti-debug, anti-VM, anti-hooking e bloqueio de análise em sandbox.",
+        fields: [
+          { id: "antidebug", label: "Anti-debug (%)", value: 68, type: "number" },
+          { id: "antivm", label: "Anti-VM (%)", value: 54, type: "number" },
+          { id: "hooking", label: "Anti-hooking (%)", value: 71, type: "number" },
+          { id: "sandbox", label: "Bloqueio em sandbox (%)", value: 58, type: "number" }
+        ],
+        calculate: (values) => {
+          const antiDebug = Number(values.antidebug) || 0;
+          const antiVM = Number(values.antivm) || 0;
+          const hooking = Number(values.hooking) || 0;
+          const sandbox = Number(values.sandbox) || 0;
+
+          const score = (antiDebug * 0.28) + (antiVM * 0.25) + (hooking * 0.27) + (sandbox * 0.2);
+          const risco = Math.min(100, score);
+          const status = risco >= 70 ? "Detecção alta" : risco >= 45 ? "Detecção moderada" : "Detecção baixa";
+
+          return {
+            indicadores: [
+              { label: "Nível de detecção", value: `${risco.toFixed(2)}%` },
+              { label: "Anti-debug", value: `${antiDebug.toFixed(2)}%` },
+              { label: "Anti-VM", value: `${antiVM.toFixed(2)}%` },
+              { label: "Status", value: status }
             ],
             status,
-            statusClass: taxaAcerto >= meta ? "green" : "blue"
+            statusClass: risco >= 70 ? "red" : risco >= 45 ? "amber" : "green"
           };
         }
       },
 
-      conversion: {
-        label: "Conversão",
-        description: "Ajuda a estimar conversão de leads, clientes, cliques ou pedidos a partir da taxa de entrada e resultados.",
+      effort: {
+        label: "Esforço estimado",
+        description: "Calcula o esforço de análise em tempo e recursos para descrever a profundidade da investigação necessária.",
         fields: [
-          { id: "visitantes", label: "Visitantes / leads", value: 1000, type: "number" },
-          { id: "conversoes", label: "Conversões", value: 160, type: "number" },
-          { id: "meta", label: "Meta de conversão (%)", value: 18, type: "number" }
+          { id: "tempo", label: "Tempo disponível (horas)", value: 18, type: "number" },
+          { id: "recursos", label: "Recursos técnicos (nº)", value: 4, type: "number" },
+          { id: "profundidade", label: "Profundidade requerida (%)", value: 76, type: "number" },
+          { id: "equipe", label: "Equipe envolvida (nº)", value: 2, type: "number" }
         ],
         calculate: (values) => {
-          const visitantes = Number(values.visitantes) || 0;
-          const conversoes = Number(values.conversoes) || 0;
-          const meta = Number(values.meta) || 0;
-
-          const taxaConversao = visitantes > 0 ? (conversoes / visitantes) * 100 : 0;
-          const desempenho = taxaConversao >= meta ? "Bom desempenho" : "Baixo desempenho";
-          const potencial = visitantes > 0 ? conversoes * 2 : 0;
-          const score = taxaConversao * 1.5;
-
-          return {
-            indicadores: [
-              { label: "Taxa de conversão", value: `${taxaConversao.toFixed(2)}%` },
-              { label: "Meta de conversão", value: `${meta.toFixed(2)}%` },
-              { label: "Potencial de ganho", value: `${potencial.toFixed(0)} unidades` },
-              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` }
-            ],
-            status: desempenho,
-            statusClass: taxaConversao >= meta ? "green" : "blue"
-          };
-        }
-      },
-
-      productivity: {
-        label: "Produtividade",
-        description: "Mede eficiência ao comparar tarefas concluídas, tempo investido e meta esperada de execução.",
-        fields: [
-          { id: "tarefas", label: "Tarefas executadas", value: 30, type: "number" },
-          { id: "tempo", label: "Tempo total (horas)", value: 8, type: "number" },
-          { id: "meta", label: "Meta por hora", value: 5, type: "number" }
-        ],
-        calculate: (values) => {
-          const tarefas = Number(values.tarefas) || 0;
           const tempo = Number(values.tempo) || 0;
-          const meta = Number(values.meta) || 0;
+          const recursos = Number(values.recursos) || 0;
+          const profundidade = Number(values.profundidade) || 0;
+          const equipe = Number(values.equipe) || 0;
 
-          const produtividade = tempo > 0 ? (tarefas / tempo) : 0;
-          const status = produtividade >= meta ? "Produtividade boa" : "Produtividade baixa";
-          const eficiencia = produtividade / Math.max(meta, 1) * 100;
-          const score = produtividade * 20;
+          const score = (profundidade * 0.55) + (recursos * 6) + (equipe * 8) - (tempo * 1.5);
+          const esforco = Math.max(0, Math.min(100, score));
+          const status = esforco >= 70 ? "Esforço alto" : esforco >= 40 ? "Esforço moderado" : "Esforço baixo";
 
           return {
             indicadores: [
-              { label: "Tarefas por hora", value: `${produtividade.toFixed(2)}` },
-              { label: "Meta por hora", value: `${meta.toFixed(2)}` },
-              { label: "Eficiência", value: `${eficiencia.toFixed(2)}%` },
-              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` }
+              { label: "Esforço estimado", value: `${esforco.toFixed(2)}%` },
+              { label: "Tempo disponível", value: `${tempo}h` },
+              { label: "Profundidade", value: `${profundidade.toFixed(2)}%` },
+              { label: "Status", value: status }
             ],
             status,
-            statusClass: produtividade >= meta ? "green" : "blue"
-          };
-        }
-      },
-
-      risk: {
-        label: "Risco x recompensa",
-        description: "Compara risco, potencial de retorno e probabilidade de ganho para estimar uma decisão mais segura.",
-        fields: [
-          { id: "risco", label: "Nível de risco (%)", value: 35, type: "number" },
-          { id: "retorno", label: "Retorno esperado (%)", value: 72, type: "number" },
-          { id: "probabilidade", label: "Probabilidade de ganho (%)", value: 60, type: "number" }
-        ],
-        calculate: (values) => {
-          const risco = Number(values.risco) || 0;
-          const retorno = Number(values.retorno) || 0;
-          const probabilidade = Number(values.probabilidade) || 0;
-
-          const score = (probabilidade * 0.7) + (retorno * 0.4) - (risco * 0.5);
-          const decisao = score >= 60 ? "Decisão favorável" : "Decisão cautelosa";
-          const riscoReal = risco > 50 ? "Alto risco" : "Risco moderado";
-
-          return {
-            indicadores: [
-              { label: "Risco", value: `${risco.toFixed(2)}%` },
-              { label: "Retorno esperado", value: `${retorno.toFixed(2)}%` },
-              { label: "Probabilidade de ganho", value: `${probabilidade.toFixed(2)}%` },
-              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` }
-            ],
-            status: `${decisao} • ${riscoReal}`,
-            statusClass: score >= 60 ? "green" : "purple"
-          };
-        }
-      },
-
-      roi: {
-        label: "Custo x benefício / ROI",
-        description: "Analisa retorno percentual sobre investimento para ajudar a decidir se vale a pena executar ou não.",
-        fields: [
-          { id: "investimento", label: "Investimento", value: 1000, type: "number" },
-          { id: "retorno", label: "Retorno bruto", value: 2200, type: "number" },
-          { id: "custo", label: "Custos extras", value: 350, type: "number" }
-        ],
-        calculate: (values) => {
-          const investimento = Number(values.investimento) || 0;
-          const retorno = Number(values.retorno) || 0;
-          const custo = Number(values.custo) || 0;
-
-          const lucro = retorno - investimento - custo;
-          const roi = investimento > 0 ? ((lucro / investimento) * 100) : 0;
-          const status = roi >= 0 ? "Retorno positivo" : "Retorno negativo";
-
-          return {
-            indicadores: [
-              { label: "Lucro líquido", value: `R$ ${lucro.toFixed(2)}` },
-              { label: "ROI", value: `${roi.toFixed(2)}%` },
-              { label: "Investimento", value: `R$ ${investimento.toFixed(2)}` },
-              { label: "Retorno bruto", value: `R$ ${retorno.toFixed(2)}` }
-            ],
-            status,
-            statusClass: roi >= 0 ? "green" : "red"
+            statusClass: esforco >= 70 ? "red" : esforco >= 40 ? "amber" : "green"
           };
         }
       },
 
       custom: {
         label: "Personalizado",
-        description: "Crie sua própria lógica. Insira números e descubra um resultado adaptativo baseado no peso de cada item.",
+        description: "Modelo flexível para adaptar a análise a um alvo específico, com pesos customizáveis para risco, dificuldade e automatização.",
         fields: [
-          { id: "valor1", label: "Valor 1", value: 40, type: "number" },
-          { id: "valor2", label: "Valor 2", value: 60, type: "number" },
-          { id: "peso1", label: "Peso 1 (%)", value: 65, type: "number" },
-          { id: "peso2", label: "Peso 2 (%)", value: 35, type: "number" }
+          { id: "v1", label: "Dificuldade", value: 65, type: "number" },
+          { id: "v2", label: "Risco", value: 58, type: "number" },
+          { id: "v3", label: "Automação", value: 74, type: "number" },
+          { id: "p1", label: "Peso dificuldade (%)", value: 40, type: "number" },
+          { id: "p2", label: "Peso risco (%)", value: 35, type: "number" },
+          { id: "p3", label: "Peso automação (%)", value: 25, type: "number" }
         ],
         calculate: (values) => {
-          const v1 = Number(values.valor1) || 0;
-          const v2 = Number(values.valor2) || 0;
-          const p1 = Number(values.peso1) || 0;
-          const p2 = Number(values.peso2) || 0;
+          const v1 = Number(values.v1) || 0;
+          const v2 = Number(values.v2) || 0;
+          const v3 = Number(values.v3) || 0;
+          const p1 = Number(values.p1) || 0;
+          const p2 = Number(values.p2) || 0;
+          const p3 = Number(values.p3) || 0;
 
-          const pesoTotal = p1 + p2 || 1;
-          const score = ((v1 * p1) + (v2 * p2)) / pesoTotal;
-          const status = score >= 50 ? "Resultado favorável" : "Resultado fraco";
+          const total = (p1 + p2 + p3) || 1;
+          const score = ((v1 * p1) + (v2 * p2) + (v3 * p3)) / total;
+          const status = score >= 60 ? "Alvo estratégico" : score >= 40 ? "Alvo adequado" : "Alvo simples";
 
           return {
             indicadores: [
-              { label: "Resultado ponderado", value: `${score.toFixed(2)} pts` },
-              { label: "Peso 1", value: `${p1.toFixed(2)}%` },
-              { label: "Peso 2", value: `${p2.toFixed(2)}%` },
-              { label: "Comparativo", value: `${v1.toFixed(2)} / ${v2.toFixed(2)}` }
+              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` },
+              { label: "Dificuldade", value: `${v1.toFixed(2)}%` },
+              { label: "Risco", value: `${v2.toFixed(2)}%` },
+              { label: "Automação", value: `${v3.toFixed(2)}%` }
             ],
             status,
-            statusClass: score >= 50 ? "green" : "blue"
+            statusClass: score >= 60 ? "purple" : score >= 40 ? "blue" : "green"
           };
         }
       }
@@ -516,7 +513,6 @@
       const profile = profiles[profileKey];
       const dynamicInputs = document.getElementById("dynamicInputs");
       const description = document.getElementById("description");
-
       description.textContent = profile.description;
 
       dynamicInputs.innerHTML = profile.fields.map(field => `
@@ -552,11 +548,8 @@
       const inputs = {};
       profile.fields.forEach(field => {
         const element = document.getElementById(field.id);
-        if (element) {
-          inputs[field.id] = element.value;
-        }
+        if (element) inputs[field.id] = element.value;
       });
-
       const result = profile.calculate(inputs);
       renderResults(result);
     }
@@ -567,8 +560,12 @@
     });
 
     document.getElementById("calcAdaptive").addEventListener("click", calculateAdaptive);
+    document.getElementById("resetAdaptive").addEventListener("click", () => {
+      renderProfileInputs(document.getElementById("profileSelect").value);
+      calculateAdaptive();
+    });
 
-    renderProfileInputs("success");
+    renderProfileInputs("reverse");
     calculateAdaptive();
   </script>
 </body>
