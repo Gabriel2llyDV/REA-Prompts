@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Adaptável</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg2: #111827;
+      --panel: rgba(17, 24, 39, 0.96);
+      --border: rgba(255,255,255,0.08);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --button: #e5e7eb;
+      --button-text: #111827;
+      --shadow: rgba(0,0,0,.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 24px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 18px 40px var(--shadow);
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: 1.5rem;
+    }
+
+    .display {
+      width: 100%;
+      height: 78px;
+      border: none;
+      border-radius: 12px;
+      background: #020817;
+      color: white;
+      font-size: 2rem;
+      text-align: right;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 18px 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .number { background: var(--button); color: var(--button-text); }
+    .operator { background: var(--warning); color: white; }
+    .action { background: #9ca3af; color: #111827; }
+    .equal { background: var(--success); color: white; grid-column: span 2; }
+    .primary { background: var(--primary); color: white; }
+
+    .adaptive-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .adaptive-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .adaptive-actions button {
+      flex: 1;
+    }
+
+    .description {
+      margin: 12px 0 18px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(59,130,246,.08);
+      border: 1px solid rgba(59,130,246,.18);
+      color: #dbeafe;
+      line-height: 1.5;
+    }
+
+    .results {
+      margin-top: 18px;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .results h3 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      color: var(--muted);
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.98rem;
+    }
+
+    .stat:last-child {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: bold;
+    }
+
+    .green { background: rgba(16,185,129,.15); color: #6ee7b7; }
+    .red { background: rgba(239,68,68,.12); color: #fca5a5; }
+    .blue { background: rgba(59,130,246,.15); color: #93c5fd; }
+    .purple { background: rgba(139,92,246,.15); color: #c4b5fd; }
+
+    @media (max-width: 920px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel">
+      <h2>Calculadora básica</h2>
+      <input class="display" id="display" type="text" readonly value="0" />
+
+      <div class="buttons">
+        <button class="action" onclick="clearDisplay()">C</button>
+        <button class="action" onclick="deleteLast()">DEL</button>
+        <button class="operator" onclick="appendValue('/')">/</button>
+        <button class="operator" onclick="appendValue('*')">*</button>
+
+        <button class="number" onclick="appendValue('7')">7</button>
+        <button class="number" onclick="appendValue('8')">8</button>
+        <button class="number" onclick="appendValue('9')">9</button>
+        <button class="operator" onclick="appendValue('-')">-</button>
+
+        <button class="number" onclick="appendValue('4')">4</button>
+        <button class="number" onclick="appendValue('5')">5</button>
+        <button class="number" onclick="appendValue('6')">6</button>
+        <button class="operator" onclick="appendValue('+')">+</button>
+
+        <button class="number" onclick="appendValue('1')">1</button>
+        <button class="number" onclick="appendValue('2')">2</button>
+        <button class="number" onclick="appendValue('3')">3</button>
+        <button class="equal" onclick="calculateResult()">=</button>
+
+        <button class="number" onclick="appendValue('0')" style="grid-column: span 2;">0</button>
+        <button class="number" onclick="appendValue('.')">.</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="adaptive-header">
+        <h2>Calculadora adaptável</h2>
+      </div>
+
+      <select id="profileSelect" aria-label="Selecione a finalidade">
+        <option value="success">Taxa de sucesso</option>
+        <option value="conversion">Conversão</option>
+        <option value="productivity">Produtividade</option>
+        <option value="risk">Risco x recompensa</option>
+        <option value="roi">Custo x benefício / ROI</option>
+        <option value="custom">Personalizado</option>
+      </select>
+
+      <div id="description" class="description"></div>
+      <div id="dynamicInputs"></div>
+
+      <div class="adaptive-actions">
+        <button class="primary" id="calcAdaptive">Calcular</button>
+      </div>
+
+      <div id="results" class="results"></div>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    let expression = "";
+
+    function appendValue(value) {
+      if (display.value === "Error") {
+        expression = "";
+        display.value = "0";
+      }
+      expression += value;
+      display.value = expression;
+    }
+
+    function clearDisplay() {
+      expression = "";
+      display.value = "0";
+    }
+
+    function deleteLast() {
+      expression = expression.slice(0, -1);
+      display.value = expression || "0";
+    }
+
+    function calculateResult() {
+      try {
+        const safeExpression = expression.replace(/×/g, "*").replace(/÷/g, "/");
+        if (!/^[0-9+\-*/.() ]+$/.test(safeExpression)) {
+          throw new Error("Expressão inválida");
+        }
+        const result = Function(`"use strict"; return (${safeExpression})`)();
+        if (!Number.isFinite(result)) {
+          throw new Error("Resultado inválido");
+        }
+        expression = String(result);
+        display.value = expression;
+      } catch {
+        display.value = "Error";
+        expression = "";
+      }
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const key = event.key;
+
+      if (/^[0-9]$/.test(key) || ["+", "-", "*", "/", "."].includes(key)) {
+        appendValue(key);
+      } else if (key === "Enter" || key === "=") {
+        calculateResult();
+      } else if (key === "Backspace") {
+        deleteLast();
+      } else if (key === "Escape") {
+        clearDisplay();
+      }
+    });
+
+    const profiles = {
+      success: {
+        label: "Taxa de sucesso",
+        description: "Avalia a chance real de um objetivo ser alcançado com base em tentativas, acertos e meta desejada.",
+        fields: [
+          { id: "total", label: "Tentativas totais", value: 100, type: "number" },
+          { id: "sucessos", label: "Sucessos", value: 65, type: "number" },
+          { id: "falhas", label: "Falhas", value: 35, type: "number" },
+          { id: "meta", label: "Meta de sucesso (%)", value: 70, type: "number" }
+        ],
+        calculate: (values) => {
+          const total = Number(values.total) || Number(values.sucessos) + Number(values.falhas) || 0;
+          const sucessos = Number(values.sucessos) || 0;
+          const falhas = Number(values.falhas) || 0;
+          const meta = Number(values.meta) || 0;
+
+          const taxaAcerto = total > 0 ? (sucessos / total) * 100 : 0;
+          const taxaPerda = total > 0 ? (falhas / total) * 100 : 0;
+          const chanceConseguir = taxaAcerto;
+          const chanceNaoConseguir = taxaPerda;
+          const score = (taxaAcerto * 0.8) + ((100 - taxaPerda) * 0.2);
+          const status = taxaAcerto >= meta ? "Acima da meta" : "Abaixo da meta";
+
+          return {
+            indicadores: [
+              { label: "Taxa de acerto", value: `${taxaAcerto.toFixed(2)}%` },
+              { label: "Taxa de perda", value: `${taxaPerda.toFixed(2)}%` },
+              { label: "Chance de conseguir", value: `${chanceConseguir.toFixed(2)}%` },
+              { label: "Chance de não conseguir", value: `${chanceNaoConseguir.toFixed(2)}%` },
+              { label: "Pontuação adaptativa", value: `${score.toFixed(2)} pts` }
+            ],
+            status,
+            statusClass: taxaAcerto >= meta ? "green" : "blue"
+          };
+        }
+      },
+
+      conversion: {
+        label: "Conversão",
+        description: "Ajuda a estimar conversão de leads, clientes, cliques ou pedidos a partir da taxa de entrada e resultados.",
+        fields: [
+          { id: "visitantes", label: "Visitantes / leads", value: 1000, type: "number" },
+          { id: "conversoes", label: "Conversões", value: 160, type: "number" },
+          { id: "meta", label: "Meta de conversão (%)", value: 18, type: "number" }
+        ],
+        calculate: (values) => {
+          const visitantes = Number(values.visitantes) || 0;
+          const conversoes = Number(values.conversoes) || 0;
+          const meta = Number(values.meta) || 0;
+
+          const taxaConversao = visitantes > 0 ? (conversoes / visitantes) * 100 : 0;
+          const desempenho = taxaConversao >= meta ? "Bom desempenho" : "Baixo desempenho";
+          const potencial = visitantes > 0 ? conversoes * 2 : 0;
+          const score = taxaConversao * 1.5;
+
+          return {
+            indicadores: [
+              { label: "Taxa de conversão", value: `${taxaConversao.toFixed(2)}%` },
+              { label: "Meta de conversão", value: `${meta.toFixed(2)}%` },
+              { label: "Potencial de ganho", value: `${potencial.toFixed(0)} unidades` },
+              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` }
+            ],
+            status: desempenho,
+            statusClass: taxaConversao >= meta ? "green" : "blue"
+          };
+        }
+      },
+
+      productivity: {
+        label: "Produtividade",
+        description: "Mede eficiência ao comparar tarefas concluídas, tempo investido e meta esperada de execução.",
+        fields: [
+          { id: "tarefas", label: "Tarefas executadas", value: 30, type: "number" },
+          { id: "tempo", label: "Tempo total (horas)", value: 8, type: "number" },
+          { id: "meta", label: "Meta por hora", value: 5, type: "number" }
+        ],
+        calculate: (values) => {
+          const tarefas = Number(values.tarefas) || 0;
+          const tempo = Number(values.tempo) || 0;
+          const meta = Number(values.meta) || 0;
+
+          const produtividade = tempo > 0 ? (tarefas / tempo) : 0;
+          const status = produtividade >= meta ? "Produtividade boa" : "Produtividade baixa";
+          const eficiencia = produtividade / Math.max(meta, 1) * 100;
+          const score = produtividade * 20;
+
+          return {
+            indicadores: [
+              { label: "Tarefas por hora", value: `${produtividade.toFixed(2)}` },
+              { label: "Meta por hora", value: `${meta.toFixed(2)}` },
+              { label: "Eficiência", value: `${eficiencia.toFixed(2)}%` },
+              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` }
+            ],
+            status,
+            statusClass: produtividade >= meta ? "green" : "blue"
+          };
+        }
+      },
+
+      risk: {
+        label: "Risco x recompensa",
+        description: "Compara risco, potencial de retorno e probabilidade de ganho para estimar uma decisão mais segura.",
+        fields: [
+          { id: "risco", label: "Nível de risco (%)", value: 35, type: "number" },
+          { id: "retorno", label: "Retorno esperado (%)", value: 72, type: "number" },
+          { id: "probabilidade", label: "Probabilidade de ganho (%)", value: 60, type: "number" }
+        ],
+        calculate: (values) => {
+          const risco = Number(values.risco) || 0;
+          const retorno = Number(values.retorno) || 0;
+          const probabilidade = Number(values.probabilidade) || 0;
+
+          const score = (probabilidade * 0.7) + (retorno * 0.4) - (risco * 0.5);
+          const decisao = score >= 60 ? "Decisão favorável" : "Decisão cautelosa";
+          const riscoReal = risco > 50 ? "Alto risco" : "Risco moderado";
+
+          return {
+            indicadores: [
+              { label: "Risco", value: `${risco.toFixed(2)}%` },
+              { label: "Retorno esperado", value: `${retorno.toFixed(2)}%` },
+              { label: "Probabilidade de ganho", value: `${probabilidade.toFixed(2)}%` },
+              { label: "Score adaptativo", value: `${score.toFixed(2)} pts` }
+            ],
+            status: `${decisao} • ${riscoReal}`,
+            statusClass: score >= 60 ? "green" : "purple"
+          };
+        }
+      },
+
+      roi: {
+        label: "Custo x benefício / ROI",
+        description: "Analisa retorno percentual sobre investimento para ajudar a decidir se vale a pena executar ou não.",
+        fields: [
+          { id: "investimento", label: "Investimento", value: 1000, type: "number" },
+          { id: "retorno", label: "Retorno bruto", value: 2200, type: "number" },
+          { id: "custo", label: "Custos extras", value: 350, type: "number" }
+        ],
+        calculate: (values) => {
+          const investimento = Number(values.investimento) || 0;
+          const retorno = Number(values.retorno) || 0;
+          const custo = Number(values.custo) || 0;
+
+          const lucro = retorno - investimento - custo;
+          const roi = investimento > 0 ? ((lucro / investimento) * 100) : 0;
+          const status = roi >= 0 ? "Retorno positivo" : "Retorno negativo";
+
+          return {
+            indicadores: [
+              { label: "Lucro líquido", value: `R$ ${lucro.toFixed(2)}` },
+              { label: "ROI", value: `${roi.toFixed(2)}%` },
+              { label: "Investimento", value: `R$ ${investimento.toFixed(2)}` },
+              { label: "Retorno bruto", value: `R$ ${retorno.toFixed(2)}` }
+            ],
+            status,
+            statusClass: roi >= 0 ? "green" : "red"
+          };
+        }
+      },
+
+      custom: {
+        label: "Personalizado",
+        description: "Crie sua própria lógica. Insira números e descubra um resultado adaptativo baseado no peso de cada item.",
+        fields: [
+          { id: "valor1", label: "Valor 1", value: 40, type: "number" },
+          { id: "valor2", label: "Valor 2", value: 60, type: "number" },
+          { id: "peso1", label: "Peso 1 (%)", value: 65, type: "number" },
+          { id: "peso2", label: "Peso 2 (%)", value: 35, type: "number" }
+        ],
+        calculate: (values) => {
+          const v1 = Number(values.valor1) || 0;
+          const v2 = Number(values.valor2) || 0;
+          const p1 = Number(values.peso1) || 0;
+          const p2 = Number(values.peso2) || 0;
+
+          const pesoTotal = p1 + p2 || 1;
+          const score = ((v1 * p1) + (v2 * p2)) / pesoTotal;
+          const status = score >= 50 ? "Resultado favorável" : "Resultado fraco";
+
+          return {
+            indicadores: [
+              { label: "Resultado ponderado", value: `${score.toFixed(2)} pts` },
+              { label: "Peso 1", value: `${p1.toFixed(2)}%` },
+              { label: "Peso 2", value: `${p2.toFixed(2)}%` },
+              { label: "Comparativo", value: `${v1.toFixed(2)} / ${v2.toFixed(2)}` }
+            ],
+            status,
+            statusClass: score >= 50 ? "green" : "blue"
+          };
+        }
+      }
+    };
+
+    function renderProfileInputs(profileKey) {
+      const profile = profiles[profileKey];
+      const dynamicInputs = document.getElementById("dynamicInputs");
+      const description = document.getElementById("description");
+
+      description.textContent = profile.description;
+
+      dynamicInputs.innerHTML = profile.fields.map(field => `
+        <div class="field">
+          <label for="${field.id}">${field.label}</label>
+          <input id="${field.id}" type="${field.type}" value="${field.value}" />
+        </div>
+      `).join("");
+    }
+
+    function renderResults(resultData) {
+      const results = document.getElementById("results");
+      const statusBadge = `<span class="badge ${resultData.statusClass}">${resultData.status}</span>`;
+
+      results.innerHTML = `
+        <h3>Resultado</h3>
+        <div class="stat">
+          <span>Status</span>
+          <strong>${statusBadge}</strong>
+        </div>
+        ${resultData.indicadores.map(item => `
+          <div class="stat">
+            <span>${item.label}</span>
+            <strong>${item.value}</strong>
+          </div>
+        `).join("")}
+      `;
+    }
+
+    function calculateAdaptive() {
+      const profileKey = document.getElementById("profileSelect").value;
+      const profile = profiles[profileKey];
+      const inputs = {};
+      profile.fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        if (element) {
+          inputs[field.id] = element.value;
+        }
+      });
+
+      const result = profile.calculate(inputs);
+      renderResults(result);
+    }
+
+    document.getElementById("profileSelect").addEventListener("change", (event) => {
+      renderProfileInputs(event.target.value);
+      calculateAdaptive();
+    });
+
+    document.getElementById("calcAdaptive").addEventListener("click", calculateAdaptive);
+
+    renderProfileInputs("success");
+    calculateAdaptive();
+  </script>
+</body>
+</html>
